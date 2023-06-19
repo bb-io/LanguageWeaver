@@ -17,7 +17,7 @@ namespace Apps.LanguageWeaver
 
         public TranslationStatusDto PollTransaltionOperation(string requestId, IEnumerable<AuthenticationCredentialsProvider> authenticationCredentialsProviders)
         {
-            var request = new LanguageWeaverRequest($"/mt/translations/async/{requestId}",
+            var request = new LanguageWeaverRequest($"mt/translations/async/{requestId}",
                 Method.Get, authenticationCredentialsProviders);
             var response = this.Get<TranslationStatusDto>(request);
             while (response?.TranslationStatus == "INIT" || response?.TranslationStatus == "TRANSLATING")
@@ -28,6 +28,23 @@ namespace Apps.LanguageWeaver
             if (response?.TranslationStatus != "DONE")
             {
                 throw new Exception("Translation operation failed");
+            }
+            return response;
+        }
+
+        public IdentificationStatusDto PollIndentificationOperation(string requestId, IEnumerable<AuthenticationCredentialsProvider> authenticationCredentialsProviders)
+        {
+            var request = new LanguageWeaverRequest($"multi-language-identification/async/{requestId}",
+                Method.Get, authenticationCredentialsProviders);
+            var response = this.Get<IdentificationStatusDto>(request);
+            while (response?.Status == "INIT" || response?.Status == "IN_PROGRESS")
+            {
+                Task.Delay(2000);
+                response = this.Get<IdentificationStatusDto>(request);
+            }
+            if (response?.Status != "DONE")
+            {
+                throw new Exception("Identification operation failed");
             }
             return response;
         }

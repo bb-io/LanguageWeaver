@@ -5,11 +5,6 @@ using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Actions;
 using Blackbird.Applications.Sdk.Common.Authentication;
 using RestSharp;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Apps.LanguageWeaver.Actions
 {
@@ -55,6 +50,37 @@ namespace Apps.LanguageWeaver.Actions
                 Filename = input.Filename,
                 File = translatedFile
             };
+        }
+
+        [Action("Identify text language", Description = "Identify text language")]
+        public IdentifyTextLanguageResponse IdentifyTextLanguage(IEnumerable<AuthenticationCredentialsProvider> authenticationCredentialsProviders,
+            [ActionParameter] IdentifyTextLanguageRequest input)
+        {
+            var client = new LanguageWeaverClient();
+            var request = new LanguageWeaverRequest("multi-language-identification/async", Method.Post, authenticationCredentialsProviders);
+            request.AddJsonBody(new
+            {
+                input = input.Text
+            });
+            var identificationCreateResponse = client.Execute<CreateTranslationDto>(request).Data;
+            client.PollIndentificationOperation(identificationCreateResponse.RequestId, authenticationCredentialsProviders);
+            var resultRequest = new LanguageWeaverRequest($"multi-language-identification/async/{identificationCreateResponse.RequestId}/result", Method.Get, authenticationCredentialsProviders);
+            var identifiedResult = client.Get<IdentifyTextLanguageResponse>(resultRequest);
+            return identifiedResult;
+        }
+
+        [Action("Identify file language", Description = "Identify file language")]
+        public IdentifyTextLanguageResponse IdentifyFileLanguage(IEnumerable<AuthenticationCredentialsProvider> authenticationCredentialsProviders,
+            [ActionParameter] IdentifyFileLanguageRequest input)
+        {
+            var client = new LanguageWeaverClient();
+            var request = new LanguageWeaverRequest("multi-language-identification/async", Method.Post, authenticationCredentialsProviders);
+            request.AddFile("input", input.File, input.Filename);
+            var identificationCreateResponse = client.Execute<CreateTranslationDto>(request).Data;
+            client.PollIndentificationOperation(identificationCreateResponse.RequestId, authenticationCredentialsProviders);
+            var resultRequest = new LanguageWeaverRequest($"multi-language-identification/async/{identificationCreateResponse.RequestId}/result", Method.Get, authenticationCredentialsProviders);
+            var identifiedResult = client.Get<IdentifyTextLanguageResponse>(resultRequest);
+            return identifiedResult;
         }
     }
 }
