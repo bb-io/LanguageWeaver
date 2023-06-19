@@ -20,7 +20,7 @@ namespace Apps.LanguageWeaver
             var request = new LanguageWeaverRequest($"/mt/translations/async/{requestId}",
                 Method.Get, authenticationCredentialsProviders);
             var response = this.Get<TranslationStatusDto>(request);
-            while (response?.TranslationStatus == "TRANSLATING")
+            while (response?.TranslationStatus == "INIT" || response?.TranslationStatus == "TRANSLATING")
             {
                 Task.Delay(2000);
                 response = this.Get<TranslationStatusDto>(request);

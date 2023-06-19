@@ -35,5 +35,26 @@ namespace Apps.LanguageWeaver.Actions
             var translation = client.Get<TranslationTextResultDto>(resultRequest);
             return new TranslateTextResponse(translation);
         }
+
+        [Action("Translate file", Description = "Translate file")]
+        public TranslateFileResponse TranslateFile(IEnumerable<AuthenticationCredentialsProvider> authenticationCredentialsProviders,
+            [ActionParameter] TranslateFileRequest input)
+        {
+            var client = new LanguageWeaverClient();
+            var request = new LanguageWeaverRequest("mt/translations/async", Method.Post, authenticationCredentialsProviders);
+            request.AddParameter("sourceLanguageId", input.SourceLanguage);
+            request.AddParameter("targetLanguageId", input.TargetLanguage);
+            request.AddParameter("model", "generic");
+            request.AddFile("input", input.File, input.Filename);
+            var translationCreateResponse = client.Execute<CreateTranslationDto>(request).Data;
+            client.PollTransaltionOperation(translationCreateResponse.RequestId, authenticationCredentialsProviders);
+            var resultRequest = new LanguageWeaverRequest($"mt/translations/async/{translationCreateResponse.RequestId}/content", Method.Get, authenticationCredentialsProviders);
+            var translatedFile = client.Get(resultRequest).RawBytes;
+            return new TranslateFileResponse()
+            {
+                Filename = input.Filename,
+                File = translatedFile
+            };
+        }
     }
 }
