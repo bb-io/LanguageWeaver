@@ -48,5 +48,24 @@ namespace Apps.LanguageWeaver
             }
             return response;
         }
+
+        public InsightStatusDto PollInsightCreationOperation(string insightId, IEnumerable<AuthenticationCredentialsProvider> authenticationCredentialsProviders)
+        {
+            var request = new LanguageWeaverRequest($"content-insights/{insightId}",
+                Method.Get, authenticationCredentialsProviders);
+            var response = this.Get<InsightStatusDto>(request);
+            while (response?.ContentInsightsStatus == "INIT" ||
+                   response?.ContentInsightsStatus == "ACCEPTED" ||
+                   response?.ContentInsightsStatus == "IN_PROGRESS")
+            {
+                Task.Delay(2000);
+                response = this.Get<InsightStatusDto>(request);
+            }
+            if (response?.ContentInsightsStatus != "DONE")
+            {
+                throw new Exception("Insight creation operation failed");
+            }
+            return response;
+        }
     }
 }
