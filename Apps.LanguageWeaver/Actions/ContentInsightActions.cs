@@ -13,6 +13,7 @@ using System.Threading.Tasks;
 
 namespace Apps.LanguageWeaver.Actions
 {
+    [ActionList]
     public class ContentInsightActions
     {
         [Action("Create content insights for file", Description = "Create content insights for file")]
