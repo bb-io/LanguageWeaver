@@ -15,18 +15,25 @@ namespace Apps.LanguageWeaver.Connections
                 ConnectionUsage = ConnectionUsage.Actions,
                 ConnectionProperties = new List<ConnectionProperty>()
                 {
-                    new ConnectionProperty("apiKey")
+                    new ConnectionProperty("Client Id"),
+                    new ConnectionProperty("Client secret")
                 }
             }
         };
 
         public IEnumerable<AuthenticationCredentialsProvider> CreateAuthorizationCredentialsProviders(Dictionary<string, string> values)
         {
-            var apiKey = values.First(v => v.Key == "apiKey");
+            var apiKey = values.First(v => v.Key == "Client Id");
             yield return new AuthenticationCredentialsProvider(
                 AuthenticationCredentialsRequestLocation.None,
                 apiKey.Key,
                 apiKey.Value
+            );
+            var secret = values.First(v => v.Key == "Client secret");
+            yield return new AuthenticationCredentialsProvider(
+                AuthenticationCredentialsRequestLocation.None,
+                secret.Key,
+                secret.Value
             );
         }
     }

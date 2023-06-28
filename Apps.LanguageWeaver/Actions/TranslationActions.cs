@@ -15,7 +15,7 @@ namespace Apps.LanguageWeaver.Actions
         public TranslateTextResponse TranslateText(IEnumerable<AuthenticationCredentialsProvider> authenticationCredentialsProviders,
             [ActionParameter] TranslateTextRequest input)
         {
-            var client = new LanguageWeaverClient();
+            var client = new LanguageWeaverClient(authenticationCredentialsProviders);
             var request = new LanguageWeaverRequest("mt/translations/async", Method.Post, authenticationCredentialsProviders);
             request.AddJsonBody(new
             {            
@@ -35,7 +35,7 @@ namespace Apps.LanguageWeaver.Actions
         public TranslateFileResponse TranslateFile(IEnumerable<AuthenticationCredentialsProvider> authenticationCredentialsProviders,
             [ActionParameter] TranslateFileRequest input)
         {
-            var client = new LanguageWeaverClient();
+            var client = new LanguageWeaverClient(authenticationCredentialsProviders);
             var request = new LanguageWeaverRequest("mt/translations/async", Method.Post, authenticationCredentialsProviders);
             request.AddParameter("sourceLanguageId", input.SourceLanguage);
             request.AddParameter("targetLanguageId", input.TargetLanguage);
@@ -56,7 +56,7 @@ namespace Apps.LanguageWeaver.Actions
         public IdentifyTextLanguageResponse IdentifyTextLanguage(IEnumerable<AuthenticationCredentialsProvider> authenticationCredentialsProviders,
             [ActionParameter] IdentifyTextLanguageRequest input)
         {
-            var client = new LanguageWeaverClient();
+            var client = new LanguageWeaverClient(authenticationCredentialsProviders);
             var request = new LanguageWeaverRequest("multi-language-identification/async", Method.Post, authenticationCredentialsProviders);
             request.AddJsonBody(new
             {
@@ -73,7 +73,7 @@ namespace Apps.LanguageWeaver.Actions
         public IdentifyTextLanguageResponse IdentifyFileLanguage(IEnumerable<AuthenticationCredentialsProvider> authenticationCredentialsProviders,
             [ActionParameter] IdentifyFileLanguageRequest input)
         {
-            var client = new LanguageWeaverClient();
+            var client = new LanguageWeaverClient(authenticationCredentialsProviders);
             var request = new LanguageWeaverRequest("multi-language-identification/async", Method.Post, authenticationCredentialsProviders);
             request.AddFile("input", input.File, input.Filename);
             var identificationCreateResponse = client.Execute<CreateTranslationDto>(request).Data;

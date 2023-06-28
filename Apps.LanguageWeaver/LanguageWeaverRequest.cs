@@ -12,7 +12,6 @@ namespace Apps.LanguageWeaver
     {
         public LanguageWeaverRequest(string endpoint, Method method, IEnumerable<AuthenticationCredentialsProvider> authenticationCredentialsProviders) : base(endpoint, method)
         {
-            this.AddHeader("Authorization", $"Bearer {authenticationCredentialsProviders.First(p => p.KeyName == "apiKey").Value}");
         }
     }
 }

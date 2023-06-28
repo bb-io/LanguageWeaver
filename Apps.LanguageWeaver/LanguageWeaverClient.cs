@@ -11,9 +11,19 @@ namespace Apps.LanguageWeaver
 {
     public class LanguageWeaverClient : RestClient
     {
-        public LanguageWeaverClient() :
+        public LanguageWeaverClient(IEnumerable<AuthenticationCredentialsProvider> authenticationCredentialsProviders) :
             base(new RestClientOptions() { ThrowOnAnyError = true, BaseUrl = new Uri("https://api.languageweaver.com/v4/") })
-        { }
+        {
+            var client = new RestClient();
+            var request = new RestRequest("https://api.languageweaver.com/v4/token", Method.Post);
+            request.AddJsonBody(new
+            {
+                clientId = authenticationCredentialsProviders.First(p => p.KeyName == "Client Id").Value,
+                clientSecret = authenticationCredentialsProviders.First(p => p.KeyName == "Client secret").Value,
+            });
+            var token = client.Execute<AccessTokenResponse>(request).Data.AccessToken;
+            this.AddDefaultHeader("Authorization", $"Bearer {token}");
+        }
 
         public TranslationStatusDto PollTransaltionOperation(string requestId, IEnumerable<AuthenticationCredentialsProvider> authenticationCredentialsProviders)
         {
@@ -67,5 +77,10 @@ namespace Apps.LanguageWeaver
             }
             return response;
         }
+    }
+
+    public class AccessTokenResponse
+    {
+        public string AccessToken { get; set; }
     }
 }

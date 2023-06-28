@@ -20,7 +20,7 @@ namespace Apps.LanguageWeaver.Actions
         public CreateInsightsDto CreateInsightsForFile(IEnumerable<AuthenticationCredentialsProvider> authenticationCredentialsProviders,
             [ActionParameter] CreateInsightsForFileRequest input)
         {
-            var client = new LanguageWeaverClient();
+            var client = new LanguageWeaverClient(authenticationCredentialsProviders);
             var request = new LanguageWeaverRequest("content-insights", Method.Post, authenticationCredentialsProviders);
             request.AddParameter("sourceLanguage", input.SourceLanguage);
             request.AddFile("input", input.File, input.Filename);
@@ -33,7 +33,7 @@ namespace Apps.LanguageWeaver.Actions
         public GetContentInsightsResponse GetContentInsights(IEnumerable<AuthenticationCredentialsProvider> authenticationCredentialsProviders,
             [ActionParameter] GetContentInsightsRequest input)
         {
-            var client = new LanguageWeaverClient();
+            var client = new LanguageWeaverClient(authenticationCredentialsProviders);
             var resultRequest = new LanguageWeaverRequest($"content-insights/{input.ContentInsightsId}/result", Method.Get, authenticationCredentialsProviders);
             var insightsDto = client.Get<ContentInsightsDto>(resultRequest);
             return new GetContentInsightsResponse(insightsDto);
