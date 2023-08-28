@@ -1,18 +1,10 @@
 ﻿using Blackbird.Applications.Sdk.Common;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Apps.LanguageWeaver.Models.Requests.Base;
 
 namespace Apps.LanguageWeaver.Models.Requests
 {
-    public class CreateInsightsForFileRequest
+    public class CreateInsightsForFileRequest : FileRequest
     {
-        public byte[] File { get; set; }
-        public string Filename { get; set; }
-
-
         [Display("Source language")]
         public string SourceLanguage { get; set; }
     }

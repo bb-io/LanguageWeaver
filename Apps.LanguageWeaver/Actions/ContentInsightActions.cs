@@ -5,11 +5,6 @@ using Blackbird.Applications.Sdk.Common.Actions;
 using Blackbird.Applications.Sdk.Common.Authentication;
 using Blackbird.Applications.Sdk.Common;
 using RestSharp;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Apps.LanguageWeaver.Actions
 {
@@ -23,7 +18,7 @@ namespace Apps.LanguageWeaver.Actions
             var client = new LanguageWeaverClient(authenticationCredentialsProviders);
             var request = new LanguageWeaverRequest("content-insights", Method.Post, authenticationCredentialsProviders);
             request.AddParameter("sourceLanguage", input.SourceLanguage);
-            request.AddFile("input", input.File, input.Filename);
+            request.AddFile("input", input.File.Bytes, input.FileName ?? input.File.Name);
             var createInsightResponse = client.Execute<CreateInsightsDto>(request).Data;
             client.PollInsightCreationOperation(createInsightResponse.ContentInsightsId, authenticationCredentialsProviders);
             return createInsightResponse;
