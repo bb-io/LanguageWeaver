@@ -22,7 +22,7 @@ public class ContentInsightActions : LanguageWeaverInvocable
     {
         var endpoint = "content-insights";
 
-        var request = new LanguageWeaverRequest(endpoint, Method.Post, Creds);
+        var request = new LanguageWeaverRequest(endpoint, Method.Post);
         request.AddParameter("sourceLanguage", input.SourceLanguage);
         request.AddFile("input", input.File.Bytes, input.FileName ?? input.File.Name);
 
@@ -37,7 +37,7 @@ public class ContentInsightActions : LanguageWeaverInvocable
         [ActionParameter] GetContentInsightsRequest input)
     {
         var endpoint = $"content-insights/{input.ContentInsightsId}/result";
-        var resultRequest = new LanguageWeaverRequest(endpoint, Method.Get, Creds);
+        var resultRequest = new LanguageWeaverRequest(endpoint, Method.Get);
         var insightsDto = await Client.GetAsync<ContentInsightsDto>(resultRequest);
 
         return new(insightsDto);

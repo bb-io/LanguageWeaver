@@ -25,7 +25,7 @@ public class DictionaryActions : LanguageWeaverInvocable
         var self = await GetSelf();
         var endpoint = $"accounts/{self.AccountId}/dictionaries";
 
-        var request = new LanguageWeaverRequest(endpoint, Method.Get, Creds);
+        var request = new LanguageWeaverRequest(endpoint, Method.Get);
 
         return await Client.ExecuteWithErrorHandling<ListDictionariesResponse>(request);
     }
@@ -36,7 +36,7 @@ public class DictionaryActions : LanguageWeaverInvocable
         var self = await GetSelf();
         var endpoint = $"accounts/{self.AccountId}/dictionaries/{input.DictionaryId}";
 
-        var request = new LanguageWeaverRequest(endpoint, Method.Get, Creds);
+        var request = new LanguageWeaverRequest(endpoint, Method.Get);
 
         return await Client.ExecuteWithErrorHandling<DictionaryDto>(request);
     }
@@ -47,7 +47,7 @@ public class DictionaryActions : LanguageWeaverInvocable
         var self = await GetSelf();
         var endpoint = $"accounts/{self.AccountId}/dictionaries";
 
-        var request = new LanguageWeaverRequest(endpoint, Method.Post, Creds)
+        var request = new LanguageWeaverRequest(endpoint, Method.Post)
             .WithJsonBody(input, JsonConfig.Settings);
 
         return await Client.ExecuteWithErrorHandling<DictionaryDto>(request);
@@ -59,7 +59,7 @@ public class DictionaryActions : LanguageWeaverInvocable
         var self = await GetSelf();
         var endpoint = $"accounts/{self.AccountId}/dictionaries/{input.DictionaryId}";
 
-        var request = new LanguageWeaverRequest(endpoint, Method.Delete, Creds);
+        var request = new LanguageWeaverRequest(endpoint, Method.Delete);
 
         await Client.ExecuteWithErrorHandling(request);
     }

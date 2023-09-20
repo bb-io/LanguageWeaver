@@ -20,7 +20,7 @@ public class DictionaryDataHandler : LanguageWeaverInvocable, IAsyncDataSourceHa
         var self = await new AccountActions(InvocationContext).GetSelf();
         var endpoint = $"accounts/{self.AccountId}/dictionaries";
 
-        var request = new LanguageWeaverRequest(endpoint, Method.Get, Creds);
+        var request = new LanguageWeaverRequest(endpoint, Method.Get);
         var response = await Client.ExecuteWithErrorHandling<ListDictionariesResponse>(request);
 
         return response.Dictionaries

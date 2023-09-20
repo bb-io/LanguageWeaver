@@ -14,11 +14,11 @@ public class AccountActions : LanguageWeaverInvocable
     {
     }
     
-    [Action("Get API Credentials self", Description = "Retrieve information about the credentials account")]
+    [Action("Get API credentials self", Description = "Retrieve information about the credentials account")]
     public Task<AccountDto> GetSelf()
     {
         var endpoint = "accounts/api-credentials/self";
-        var request = new LanguageWeaverRequest(endpoint, Method.Get, Creds);
+        var request = new LanguageWeaverRequest(endpoint, Method.Get);
         
         return Client.ExecuteWithErrorHandling<AccountDto>(request);
     }

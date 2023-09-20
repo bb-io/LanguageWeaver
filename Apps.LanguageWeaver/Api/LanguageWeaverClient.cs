@@ -33,7 +33,7 @@ public class LanguageWeaverClient : BlackBirdRestClient
         IEnumerable<AuthenticationCredentialsProvider> creds)
     {
         var request = new LanguageWeaverRequest($"mt/translations/async/{requestId}",
-            Method.Get, creds);
+            Method.Get);
         var response = this.Get<TranslationStatusDto>(request);
         while (response?.TranslationStatus == "INIT" || response?.TranslationStatus == "TRANSLATING")
         {
@@ -49,7 +49,7 @@ public class LanguageWeaverClient : BlackBirdRestClient
         IEnumerable<AuthenticationCredentialsProvider> creds)
     {
         var request = new LanguageWeaverRequest($"multi-language-identification/async/{requestId}",
-            Method.Get, creds);
+            Method.Get);
         var response = this.Get<IdentificationStatusDto>(request);
         while (response?.Status == "INIT" || response?.Status == "IN_PROGRESS")
         {
@@ -67,7 +67,7 @@ public class LanguageWeaverClient : BlackBirdRestClient
         IEnumerable<AuthenticationCredentialsProvider> creds)
     {
         var request = new LanguageWeaverRequest($"content-insights/{insightId}",
-            Method.Get, creds);
+            Method.Get);
         var response = this.Get<InsightStatusDto>(request);
         while (response?.ContentInsightsStatus == "INIT" ||
                response?.ContentInsightsStatus == "ACCEPTED" ||

@@ -23,7 +23,7 @@ public class TranslationActions : LanguageWeaverInvocable
     public async Task<TranslateTextResponse> TranslateText([ActionParameter] TranslateTextRequest input)
     {
         var endpoint = "mt/translations/async";
-        var request = new LanguageWeaverRequest(endpoint, Method.Post, Creds);
+        var request = new LanguageWeaverRequest(endpoint, Method.Post);
         request.AddJsonBody(new
         {
             sourceLanguageId = input.SourceLanguage,
@@ -42,7 +42,7 @@ public class TranslationActions : LanguageWeaverInvocable
     public async Task<TranslateFileResponse> TranslateFile([ActionParameter] TranslateFileRequest input)
     {
         var endpoint = "mt/translations/async";
-        var request = new LanguageWeaverRequest(endpoint, Method.Post, Creds);
+        var request = new LanguageWeaverRequest(endpoint, Method.Post);
 
         var fileName = input.FileName ?? input.File.Name;
         request.AddParameter("sourceLanguageId", input.SourceLanguage);
@@ -67,7 +67,7 @@ public class TranslationActions : LanguageWeaverInvocable
         [ActionParameter] IdentifyTextLanguageRequest input)
     {
         var endpoint = "multi-language-identification/async";
-        var request = new LanguageWeaverRequest(endpoint, Method.Post, Creds);
+        var request = new LanguageWeaverRequest(endpoint, Method.Post);
         request.AddJsonBody(new
         {
             input = input.Text,
@@ -82,7 +82,7 @@ public class TranslationActions : LanguageWeaverInvocable
         [ActionParameter] IdentifyFileLanguageRequest input)
     {
         var endpoint = "multi-language-identification/async";
-        var request = new LanguageWeaverRequest(endpoint, Method.Post, Creds)
+        var request = new LanguageWeaverRequest(endpoint, Method.Post)
             .AddFile("input", input.File.Bytes, input.FileName ?? input.File.Name)
             .AddParameter("inputFormat", input.Format ?? "PLAIN");
 
@@ -99,7 +99,7 @@ public class TranslationActions : LanguageWeaverInvocable
         Client.PollIndentificationOperation(requestId, Creds);
 
         var resultEndpoint = $"multi-language-identification/async/{requestId}/result";
-        var resultRequest = new LanguageWeaverRequest(resultEndpoint, Method.Get, Creds);
+        var resultRequest = new LanguageWeaverRequest(resultEndpoint, Method.Get);
 
         return await Client.GetAsync<IdentifyTextLanguageResponse>(resultRequest);
     }
@@ -112,7 +112,7 @@ public class TranslationActions : LanguageWeaverInvocable
         Client.PollTransaltionOperation(requestId, Creds);
 
         var resultEndpoint = $"mt/translations/async/{requestId}/content";
-        var resultRequest = new LanguageWeaverRequest(resultEndpoint, Method.Get, Creds);
+        var resultRequest = new LanguageWeaverRequest(resultEndpoint, Method.Get);
 
         return await Client.GetAsync(resultRequest);
     }
