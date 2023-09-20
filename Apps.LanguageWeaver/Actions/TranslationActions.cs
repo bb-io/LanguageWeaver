@@ -1,112 +1,121 @@
 ﻿using System.Net.Mime;
-using Apps.LanguageWeaver.Dto;
-using Apps.LanguageWeaver.Models.Requests;
-using Apps.LanguageWeaver.Models.Requests.Base;
-using Apps.LanguageWeaver.Models.Responses;
+using Apps.LanguageWeaver.Api;
+using Apps.LanguageWeaver.Invocables;
+using Apps.LanguageWeaver.Models.Dto;
+using Apps.LanguageWeaver.Models.Requests.Translation;
+using Apps.LanguageWeaver.Models.Responses.Translation;
 using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Actions;
-using Blackbird.Applications.Sdk.Common.Authentication;
+using Blackbird.Applications.Sdk.Common.Invocation;
+using Newtonsoft.Json;
 using RestSharp;
 
-namespace Apps.LanguageWeaver.Actions
+namespace Apps.LanguageWeaver.Actions;
+
+[ActionList]
+public class TranslationActions : LanguageWeaverInvocable
 {
-    [ActionList]
-    public class TranslationActions
+    public TranslationActions(InvocationContext invocationContext) : base(invocationContext)
     {
-        [Action("Translate text", Description = "Translate text")]
-        public TranslateTextResponse TranslateText(
-            IEnumerable<AuthenticationCredentialsProvider> authenticationCredentialsProviders,
-            [ActionParameter] TranslateTextRequest input)
-        {
-            var client = new LanguageWeaverClient(authenticationCredentialsProviders);
-            var request = new LanguageWeaverRequest("mt/translations/async", Method.Post,
-                authenticationCredentialsProviders);
-            request.AddJsonBody(new
-            {
-                sourceLanguageId = input.SourceLanguage,
-                targetLanguageId = input.TargetLanguage,
-                input = new[] { input.Text },
-                model = "generic"
-            });
-            var translationCreateResponse = client.Execute<CreateTranslationDto>(request).Data;
-            client.PollTransaltionOperation(translationCreateResponse.RequestId, authenticationCredentialsProviders);
-            var resultRequest = new LanguageWeaverRequest(
-                $"mt/translations/async/{translationCreateResponse.RequestId}/content", Method.Get,
-                authenticationCredentialsProviders);
-            var translation = client.Get<TranslationTextResultDto>(resultRequest);
-            return new TranslateTextResponse(translation);
-        }
-
-        [Action("Translate file", Description = "Translate file")]
-        public TranslateFileResponse TranslateFile(
-            IEnumerable<AuthenticationCredentialsProvider> authenticationCredentialsProviders,
-            [ActionParameter] TranslateFileRequest input)
-        {
-            var client = new LanguageWeaverClient(authenticationCredentialsProviders);
-            var request = new LanguageWeaverRequest("mt/translations/async", Method.Post,
-                authenticationCredentialsProviders);
-
-            var fileName = input.FileName ?? input.File.Name;
-            request.AddParameter("sourceLanguageId", input.SourceLanguage);
-            request.AddParameter("targetLanguageId", input.TargetLanguage);
-            request.AddParameter("model", "generic");
-            request.AddFile("input", input.File.Bytes, fileName);
-            var translationCreateResponse = client.Execute<CreateTranslationDto>(request).Data;
-            client.PollTransaltionOperation(translationCreateResponse.RequestId, authenticationCredentialsProviders);
-            var resultRequest = new LanguageWeaverRequest(
-                $"mt/translations/async/{translationCreateResponse.RequestId}/content", Method.Get,
-                authenticationCredentialsProviders);
-            var translatedFile = client.Get(resultRequest).RawBytes;
-
-            return new()
-            {
-                File = new(translatedFile ?? Array.Empty<byte>())
-                {
-                    Name = fileName,
-                    ContentType = MediaTypeNames.Application.Octet
-                }
-            };
-        }
-
-        [Action("Identify text language", Description = "Identify text language")]
-        public IdentifyTextLanguageResponse IdentifyTextLanguage(
-            IEnumerable<AuthenticationCredentialsProvider> authenticationCredentialsProviders,
-            [ActionParameter] IdentifyTextLanguageRequest input)
-        {
-            var client = new LanguageWeaverClient(authenticationCredentialsProviders);
-            var request = new LanguageWeaverRequest("multi-language-identification/async", Method.Post,
-                authenticationCredentialsProviders);
-            request.AddJsonBody(new
-            {
-                input = input.Text
-            });
-            var identificationCreateResponse = client.Execute<CreateTranslationDto>(request).Data;
-            client.PollIndentificationOperation(identificationCreateResponse.RequestId,
-                authenticationCredentialsProviders);
-            var resultRequest = new LanguageWeaverRequest(
-                $"multi-language-identification/async/{identificationCreateResponse.RequestId}/result", Method.Get,
-                authenticationCredentialsProviders);
-            var identifiedResult = client.Get<IdentifyTextLanguageResponse>(resultRequest);
-            return identifiedResult;
-        }
-
-        [Action("Identify file language", Description = "Identify file language")]
-        public IdentifyTextLanguageResponse IdentifyFileLanguage(
-            IEnumerable<AuthenticationCredentialsProvider> authenticationCredentialsProviders,
-            [ActionParameter] FileRequest input)
-        {
-            var client = new LanguageWeaverClient(authenticationCredentialsProviders);
-            var request = new LanguageWeaverRequest("multi-language-identification/async", Method.Post,
-                authenticationCredentialsProviders);
-            request.AddFile("input", input.File.Bytes, input.FileName ?? input.File.Name);
-            var identificationCreateResponse = client.Execute<CreateTranslationDto>(request).Data;
-            client.PollIndentificationOperation(identificationCreateResponse.RequestId,
-                authenticationCredentialsProviders);
-            var resultRequest = new LanguageWeaverRequest(
-                $"multi-language-identification/async/{identificationCreateResponse.RequestId}/result", Method.Get,
-                authenticationCredentialsProviders);
-            var identifiedResult = client.Get<IdentifyTextLanguageResponse>(resultRequest);
-            return identifiedResult;
-        }
     }
+
+    [Action("Translate text", Description = "Translate specific text")]
+    public async Task<TranslateTextResponse> TranslateText([ActionParameter] TranslateTextRequest input)
+    {
+        var endpoint = "mt/translations/async";
+        var request = new LanguageWeaverRequest(endpoint, Method.Post, Creds);
+        request.AddJsonBody(new
+        {
+            sourceLanguageId = input.SourceLanguage,
+            targetLanguageId = input.TargetLanguage,
+            input = new[] { input.Text },
+            model = "generic"
+        });
+
+        var response = await Translate(request);
+        var translation = JsonConvert.DeserializeObject<TranslationTextResultDto>(response.Content);
+
+        return new(translation);
+    }
+
+    [Action("Translate file", Description = "Translate file")]
+    public async Task<TranslateFileResponse> TranslateFile([ActionParameter] TranslateFileRequest input)
+    {
+        var endpoint = "mt/translations/async";
+        var request = new LanguageWeaverRequest(endpoint, Method.Post, Creds);
+
+        var fileName = input.FileName ?? input.File.Name;
+        request.AddParameter("sourceLanguageId", input.SourceLanguage);
+        request.AddParameter("targetLanguageId", input.TargetLanguage);
+        request.AddParameter("model", "generic");
+        request.AddFile("input", input.File.Bytes, fileName);
+
+        var translatedFile = await Translate(request);
+
+        return new()
+        {
+            File = new(translatedFile.RawBytes ?? Array.Empty<byte>())
+            {
+                Name = fileName,
+                ContentType = MediaTypeNames.Application.Octet
+            }
+        };
+    }
+
+    [Action("Identify text language", Description = "Identify language of the given text")]
+    public Task<IdentifyTextLanguageResponse> IdentifyTextLanguage(
+        [ActionParameter] IdentifyTextLanguageRequest input)
+    {
+        var endpoint = "multi-language-identification/async";
+        var request = new LanguageWeaverRequest(endpoint, Method.Post, Creds);
+        request.AddJsonBody(new
+        {
+            input = input.Text,
+            inputFormat = input.Format ?? "PLAIN"
+        });
+
+        return IdentifyLanguage(request);
+    }
+
+    [Action("Identify file language", Description = "Identify file language")]
+    public Task<IdentifyTextLanguageResponse> IdentifyFileLanguage(
+        [ActionParameter] IdentifyFileLanguageRequest input)
+    {
+        var endpoint = "multi-language-identification/async";
+        var request = new LanguageWeaverRequest(endpoint, Method.Post, Creds)
+            .AddFile("input", input.File.Bytes, input.FileName ?? input.File.Name)
+            .AddParameter("inputFormat", input.Format ?? "PLAIN");
+
+        return IdentifyLanguage(request);
+    }
+
+    #region Utils
+
+    private async Task<IdentifyTextLanguageResponse> IdentifyLanguage(RestRequest request)
+    {
+        var identificationCreateResponse = await Client.ExecuteAsync<CreateTranslationDto>(request);
+
+        var requestId = identificationCreateResponse.Data.RequestId;
+        Client.PollIndentificationOperation(requestId, Creds);
+
+        var resultEndpoint = $"multi-language-identification/async/{requestId}/result";
+        var resultRequest = new LanguageWeaverRequest(resultEndpoint, Method.Get, Creds);
+
+        return await Client.GetAsync<IdentifyTextLanguageResponse>(resultRequest);
+    }
+
+    private async Task<RestResponse> Translate(RestRequest request)
+    {
+        var translationCreateResponse = await Client.ExecuteAsync<CreateTranslationDto>(request);
+
+        var requestId = translationCreateResponse.Data.RequestId;
+        Client.PollTransaltionOperation(requestId, Creds);
+
+        var resultEndpoint = $"mt/translations/async/{requestId}/content";
+        var resultRequest = new LanguageWeaverRequest(resultEndpoint, Method.Get, Creds);
+
+        return await Client.GetAsync(resultRequest);
+    }
+
+    #endregion
 }
