@@ -14,4 +14,8 @@ public class TranslateFileRequest : FileRequest
     [Display("Target language")]
     [DataSource(typeof(LanguageDataHandler))]
     public string TargetLanguage { get; set; }
+
+    [Display("Input format")]
+    [DataSource(typeof(InputFormatDataHandler))]
+    public string? InputFormat { get; set; }
 }

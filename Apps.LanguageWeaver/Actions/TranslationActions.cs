@@ -50,6 +50,11 @@ public class TranslationActions : LanguageWeaverInvocable
         request.AddParameter("model", "generic");
         request.AddFile("input", input.File.Bytes, fileName);
 
+        if (input.InputFormat != null)
+        {
+            request.AddParameter("inputFormat", input.InputFormat);
+        }
+
         var translatedFile = await Translate(request);
 
         return new()
