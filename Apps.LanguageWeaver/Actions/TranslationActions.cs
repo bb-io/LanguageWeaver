@@ -26,10 +26,13 @@ public class TranslationActions : LanguageWeaverInvocable
         var request = new LanguageWeaverRequest(endpoint, Method.Post);
         request.AddJsonBody(new
         {
-            sourceLanguageId = input.SourceLanguage,
+            sourceLanguageId = input.SourceLanguage ?? "auto",
             targetLanguageId = input.TargetLanguage,
             input = new[] { input.Text },
-            model = "generic"
+            model = "generic",
+            //dictionaries = input.Dictionaries ?? new List<string>(),
+            translationMode = input.TranslationMode ?? "quality",
+            //qualityEstimation = input.QualityEstimation.HasValue ? (input.QualityEstimation.Value ? 1 : 0) : 0
         });
 
         var response = await Translate(request);
@@ -45,7 +48,7 @@ public class TranslationActions : LanguageWeaverInvocable
         var request = new LanguageWeaverRequest(endpoint, Method.Post);
 
         var fileName = input.FileName ?? input.File.Name;
-        request.AddParameter("sourceLanguageId", input.SourceLanguage);
+        request.AddParameter("sourceLanguageId", input.SourceLanguage ?? "auto");
         request.AddParameter("targetLanguageId", input.TargetLanguage);
         request.AddParameter("model", "generic");
         request.AddFile("input", input.File.Bytes, fileName);
@@ -55,15 +58,15 @@ public class TranslationActions : LanguageWeaverInvocable
             request.AddParameter("inputFormat", input.InputFormat);
         }
 
-        var translatedFile = await Translate(request);
+        var response = await Translate(request);
 
         return new()
         {
-            File = new(translatedFile.RawBytes ?? Array.Empty<byte>())
+            File = new(response.RawBytes ?? Array.Empty<byte>())
             {
                 Name = fileName,
                 ContentType = MediaTypeNames.Application.Octet
-            }
+            },
         };
     }
 
@@ -114,7 +117,7 @@ public class TranslationActions : LanguageWeaverInvocable
         var translationCreateResponse = await Client.ExecuteAsync<CreateTranslationDto>(request);
 
         var requestId = translationCreateResponse.Data.RequestId;
-        Client.PollTransaltionOperation(requestId, Creds);
+        var status = Client.PollTransaltionOperation(requestId);
 
         var resultEndpoint = $"mt/translations/async/{requestId}/content";
         var resultRequest = new LanguageWeaverRequest(resultEndpoint, Method.Get);

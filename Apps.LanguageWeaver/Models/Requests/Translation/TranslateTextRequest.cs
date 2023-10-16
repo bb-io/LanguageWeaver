@@ -1,4 +1,5 @@
-﻿using Apps.LanguageWeaver.DataSourceHandlers.EnumHandlers;
+﻿using Apps.LanguageWeaver.DataSourceHandlers;
+using Apps.LanguageWeaver.DataSourceHandlers.EnumHandlers;
 using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Dynamic;
 
@@ -8,11 +9,30 @@ public class TranslateTextRequest
 {
     public string Text { get; set; }
 
-    [Display("Source language")]
-    [DataSource(typeof(LanguageDataHandler))]
-    public string SourceLanguage { get; set; }
-
     [Display("Target language")]
     [DataSource(typeof(LanguageDataHandler))]
     public string TargetLanguage { get; set; }
+
+    [Display("Source language")]
+    [DataSource(typeof(LanguageDataHandler))]
+    public string? SourceLanguage { get; set; }
+
+    // Todo: uncomment when we have friendly array input
+
+    //[Display("Dictionaries")]
+    //[DataSource(typeof(DictionaryDataHandler))]
+    //public List<string>? Dictionaries { get; set; }
+
+    [Display("Input format")]
+    [DataSource(typeof(TextInputFormatDataHandler))]
+    public string? InputFormat { get; set; }
+
+    [Display("Translation mode")]
+    [DataSource(typeof(TranslationModeDataHandler))]
+    public string? TranslationMode { get; set; }
+
+    //[Display("Use quality estimation?")]
+    //public bool? QualityEstimation { get; set; }
+
+    // Todo: linguistic options after improved dynamic inputs depending on target language
 }

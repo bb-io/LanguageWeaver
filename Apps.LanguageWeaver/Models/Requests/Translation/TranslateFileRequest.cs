@@ -9,13 +9,17 @@ public class TranslateFileRequest : FileRequest
 {
     [Display("Source language")]
     [DataSource(typeof(LanguageDataHandler))]
-    public string SourceLanguage { get; set; }
+    public string? SourceLanguage { get; set; }
 
     [Display("Target language")]
     [DataSource(typeof(LanguageDataHandler))]
     public string TargetLanguage { get; set; }
 
     [Display("Input format")]
-    [DataSource(typeof(InputFormatDataHandler))]
+    [DataSource(typeof(FileInputFormatDataHandler))]
     public string? InputFormat { get; set; }
+
+    [Display("Translation mode")]
+    [DataSource(typeof(TranslationModeDataHandler))]
+    public string? TranslationMode { get; set; }
 }

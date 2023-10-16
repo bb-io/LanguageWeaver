@@ -2,7 +2,7 @@
 
 namespace Apps.LanguageWeaver.DataSourceHandlers.EnumHandlers;
 
-public class InputFormatDataHandler : EnumDataHandler
+public class TextInputFormatDataHandler : EnumDataHandler
 {
     protected override Dictionary<string, string> EnumValues => new()
     {

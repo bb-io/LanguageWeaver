@@ -19,16 +19,16 @@ public class DictionaryActions : LanguageWeaverInvocable
     {
     }
 
-    [Action("List dictionaries", Description = "List all account dictionaries")]
-    public async Task<ListDictionariesResponse> ListDictionaries()
-    {
-        var self = await GetSelf();
-        var endpoint = $"accounts/{self.AccountId}/dictionaries";
+    //[Action("List dictionaries", Description = "List all account dictionaries")]
+    //public async Task<ListDictionariesResponse> ListDictionaries()
+    //{
+    //    var self = await GetSelf();
+    //    var endpoint = $"accounts/{self.AccountId}/dictionaries";
 
-        var request = new LanguageWeaverRequest(endpoint, Method.Get);
+    //    var request = new LanguageWeaverRequest(endpoint, Method.Get);
 
-        return await Client.ExecuteWithErrorHandling<ListDictionariesResponse>(request);
-    }
+    //    return await Client.ExecuteWithErrorHandling<ListDictionariesResponse>(request);
+    //}
 
     [Action("Get dictionary", Description = "Get specific dictionary")]
     public async Task<DictionaryDto> GetDictionary([ActionParameter] DictionaryRequest input)

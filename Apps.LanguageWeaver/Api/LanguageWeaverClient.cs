@@ -29,8 +29,7 @@ public class LanguageWeaverClient : BlackBirdRestClient
         this.AddDefaultHeader("Authorization", $"Bearer {token}");
     }
 
-    public void PollTransaltionOperation(string requestId,
-        IEnumerable<AuthenticationCredentialsProvider> creds)
+    public TranslationStatusDto PollTransaltionOperation(string requestId)
     {
         var request = new LanguageWeaverRequest($"mt/translations/async/{requestId}",
             Method.Get);
@@ -42,7 +41,9 @@ public class LanguageWeaverClient : BlackBirdRestClient
         }
 
         if (response?.TranslationStatus != "DONE")
-            throw new Exception("Translation operation failed");
+            throw new Exception($"Translation operation failed: {string.Join(" - ", response?.Errors.Select(x => x.Description))}");
+
+        return response;
     }
 
     public void PollIndentificationOperation(string requestId,

@@ -7,6 +7,6 @@ public class IdentifyTextLanguageRequest
 {
     public string Text { get; set; }
     
-    [DataSource(typeof(InputFormatDataHandler))]
+    [DataSource(typeof(TextInputFormatDataHandler))]
     public string? Format { get; set; }
 }

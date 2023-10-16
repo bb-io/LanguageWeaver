@@ -6,6 +6,6 @@ namespace Apps.LanguageWeaver.Models.Requests.Translation;
 
 public class IdentifyFileLanguageRequest : FileRequest
 {
-    [DataSource(typeof(InputFormatDataHandler))]
+    [DataSource(typeof(FileInputFormatDataHandler))]
     public string? Format { get; set; }
 }

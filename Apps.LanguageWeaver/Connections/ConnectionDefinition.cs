@@ -16,7 +16,7 @@ public class ConnectionDefinition : IConnectionDefinition
             ConnectionProperties = new List<ConnectionProperty>()
             {
                 new(CredsNames.ClientId) { DisplayName = "Client ID" },
-                new(CredsNames.ClientSecret) { DisplayName = "Client secret" }
+                new(CredsNames.ClientSecret) { DisplayName = "Client secret", Sensitive = true }
             }
         }
     };

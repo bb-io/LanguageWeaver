@@ -5,8 +5,8 @@ namespace Apps.LanguageWeaver.Models.Responses.Content;
 
 public class GetContentInsightsResponse
 {
-    [Display("Content insights ID")]
-    public string ContentInsightsId { get; set; }
+    //[Display("Content insights ID")]
+    //public string ContentInsightsId { get; set; }
 
     [Display("Input word count")]
     public int InputWordCount { get; set; }
@@ -21,7 +21,6 @@ public class GetContentInsightsResponse
     
     public GetContentInsightsResponse(ContentInsightsDto insightDto) 
     {
-        ContentInsightsId = insightDto.ContentInsightsId;
         InputWordCount = insightDto.Stats.InputWordCount;
         InputCharCount = insightDto.Stats.InputCharCount;
         SourceLanguage = insightDto.SourceLanguage;
