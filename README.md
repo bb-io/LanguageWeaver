@@ -32,7 +32,12 @@ Before you can connect you need to make sure that:
 - **Translate text** translates a text input.
 - **Translate file** translates a file input. Supported file formats can be found [here](https://developers.languageweaver.com/api/lw/common/input-formats.html).
 
-Both translation endpoints can have a mode of either "quality" or "speed".
+All translation endpoints can have a mode of either "quality" or "speed".
+
+- **Translate text with QE**
+- **Translate file with QE** both apply a quality estimation to the translated content. Source language is required and cannot be guessed. These actions have limited language combinations available and you should check available models in your Language Weaver account for supported language combinations.
+
+Quality estimation and ABBYY PDF conversion have to be enabled for your account in the Language Weaver settings.
 
 ### Identification
 
@@ -65,7 +70,6 @@ In the future we can support and add actions for:
 - Group management
 - Feedback management
 - Adaption
-- Quality estimation
 
 Let us know if you're interested!
 
