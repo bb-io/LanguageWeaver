@@ -5,11 +5,11 @@ using Blackbird.Applications.Sdk.Common.Dynamic;
 
 namespace Apps.LanguageWeaver.Models.Requests.Translation;
 
-public class TranslateFileRequest : FileRequest
+public class TranslateFileWithQeRequest : FileRequest
 {
     [Display("Source language")]
     [DataSource(typeof(LanguageDataHandler))]
-    public string? SourceLanguage { get; set; }
+    public string SourceLanguage { get; set; }
 
     [Display("Target language")]
     [DataSource(typeof(LanguageDataHandler))]
@@ -28,5 +28,5 @@ public class TranslateFileRequest : FileRequest
 
     [Display("PDF Converter")]
     [DataSource(typeof(PdfConverterDataHandler))]
-    public string PdfConverter { get; set; }
+    public string? PdfConverter { get; set; }
 }

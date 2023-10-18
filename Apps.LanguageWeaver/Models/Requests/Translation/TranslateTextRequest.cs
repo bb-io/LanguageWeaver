@@ -31,8 +31,8 @@ public class TranslateTextRequest
     [DataSource(typeof(TranslationModeDataHandler))]
     public string? TranslationMode { get; set; }
 
-    //[Display("Use quality estimation?")]
-    //public bool? QualityEstimation { get; set; }
+    [Display("Model")]
+    public string? Model { get; set; }
 
     // Todo: linguistic options after improved dynamic inputs depending on target language
 }

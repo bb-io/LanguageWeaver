@@ -8,4 +8,5 @@ namespace Apps.LanguageWeaver.Models.Responses.Translation;
 public class TranslateFileResponse
 {
     public File File { get; set; }
+    public TranslationStats Stats { get; set; }
 }

@@ -1,22 +1,30 @@
-﻿using Apps.LanguageWeaver.DataSourceHandlers.EnumHandlers;
-using Apps.LanguageWeaver.Models.Requests.Base;
+﻿using Apps.LanguageWeaver.DataSourceHandlers;
+using Apps.LanguageWeaver.DataSourceHandlers.EnumHandlers;
 using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Dynamic;
 
 namespace Apps.LanguageWeaver.Models.Requests.Translation;
 
-public class TranslateFileRequest : FileRequest
+public class TranslateTextWithQeRequest
 {
+    public string Text { get; set; }
+
     [Display("Source language")]
     [DataSource(typeof(LanguageDataHandler))]
-    public string? SourceLanguage { get; set; }
+    public string SourceLanguage { get; set; }
 
     [Display("Target language")]
     [DataSource(typeof(LanguageDataHandler))]
     public string TargetLanguage { get; set; }
 
+    // Todo: uncomment when we have friendly array input
+
+    //[Display("Dictionaries")]
+    //[DataSource(typeof(DictionaryDataHandler))]
+    //public List<string>? Dictionaries { get; set; }
+
     [Display("Input format")]
-    [DataSource(typeof(FileInputFormatDataHandler))]
+    [DataSource(typeof(TextInputFormatDataHandler))]
     public string? InputFormat { get; set; }
 
     [Display("Translation mode")]
@@ -25,8 +33,4 @@ public class TranslateFileRequest : FileRequest
 
     [Display("Model")]
     public string? Model { get; set; }
-
-    [Display("PDF Converter")]
-    [DataSource(typeof(PdfConverterDataHandler))]
-    public string PdfConverter { get; set; }
 }

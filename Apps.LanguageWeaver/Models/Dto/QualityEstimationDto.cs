@@ -10,12 +10,12 @@ namespace Apps.LanguageWeaver.Models.Dto
     public class QualityEstimationDto
     {
         [Display("Percentage poor")]
-        public int? poor { get; set; }
+        public int poor { get; set; }
 
         [Display("Percentage adequate")]
-        public int? adequate { get; set; }
+        public int adequate { get; set; }
 
         [Display("Percentage good")]
-        public int? good { get; set; }
+        public int good { get; set; }
     }
 }

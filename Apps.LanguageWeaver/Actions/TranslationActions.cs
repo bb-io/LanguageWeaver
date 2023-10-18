@@ -19,7 +19,7 @@ public class TranslationActions : LanguageWeaverInvocable
     {
     }
 
-    [Action("Translate text", Description = "Translate specific text")]
+    [Action("Translate text", Description = "Translate a text")]
     public async Task<TranslateTextResponse> TranslateText([ActionParameter] TranslateTextRequest input)
     {
         var endpoint = "mt/translations/async";
@@ -29,19 +29,40 @@ public class TranslationActions : LanguageWeaverInvocable
             sourceLanguageId = input.SourceLanguage ?? "auto",
             targetLanguageId = input.TargetLanguage,
             input = new[] { input.Text },
-            model = "generic",
+            model = input.Model ?? "generic",
             //dictionaries = input.Dictionaries ?? new List<string>(),
             translationMode = input.TranslationMode ?? "quality",
-            //qualityEstimation = input.QualityEstimation.HasValue ? (input.QualityEstimation.Value ? 1 : 0) : 0
         });
 
-        var response = await Translate(request);
+        var (response, status) = await Translate(request);
         var translation = JsonConvert.DeserializeObject<TranslationTextResultDto>(response.Content);
 
-        return new(translation);
+        return new(translation, status);
     }
 
-    [Action("Translate file", Description = "Translate file")]
+    [Action("Translate text with QE", Description = "Translate a text while also returning a quality estimation")]
+    public async Task<TranslateTextWithQeResponse> TranslateTextWithQe([ActionParameter] TranslateTextWithQeRequest input)
+    {
+        var endpoint = "mt/translations/async";
+        var request = new LanguageWeaverRequest(endpoint, Method.Post);
+        request.AddJsonBody(new
+        {
+            sourceLanguageId = input.SourceLanguage,
+            targetLanguageId = input.TargetLanguage,
+            input = new[] { input.Text },
+            model = input.Model ?? "genericqe",
+            //dictionaries = input.Dictionaries ?? new List<string>(),
+            translationMode = input.TranslationMode ?? "quality",
+            qualityEstimation = 1,
+        });
+
+        var (response, status) = await Translate(request);
+        var translation = JsonConvert.DeserializeObject<TranslationTextResultDto>(response.Content);
+
+        return new(translation, status);
+    }
+
+    [Action("Translate file", Description = "Translate a file")]
     public async Task<TranslateFileResponse> TranslateFile([ActionParameter] TranslateFileRequest input)
     {
         var endpoint = "mt/translations/async";
@@ -50,7 +71,9 @@ public class TranslationActions : LanguageWeaverInvocable
         var fileName = input.FileName ?? input.File.Name;
         request.AddParameter("sourceLanguageId", input.SourceLanguage ?? "auto");
         request.AddParameter("targetLanguageId", input.TargetLanguage);
-        request.AddParameter("model", "generic");
+        request.AddParameter("model", input.Model ?? "generic");
+        request.AddParameter("translationMode", input.TranslationMode ?? "quality");
+        request.AddParameter("pdfConverter", input.PdfConverter ?? "STANDARD");
         request.AddFile("input", input.File.Bytes, fileName);
 
         if (input.InputFormat != null)
@@ -58,7 +81,7 @@ public class TranslationActions : LanguageWeaverInvocable
             request.AddParameter("inputFormat", input.InputFormat);
         }
 
-        var response = await Translate(request);
+        var (response, status) = await Translate(request);
 
         return new()
         {
@@ -67,52 +90,45 @@ public class TranslationActions : LanguageWeaverInvocable
                 Name = fileName,
                 ContentType = MediaTypeNames.Application.Octet
             },
+            Stats = status.TranslationStats
         };
     }
 
-    [Action("Identify text language", Description = "Identify language of the given text")]
-    public Task<IdentifyTextLanguageResponse> IdentifyTextLanguage(
-        [ActionParameter] IdentifyTextLanguageRequest input)
+    [Action("Translate file with QE", Description = "Translate a file while also returning a quality estimation")]
+    public async Task<TranslateFileWithQeResponse> TranslateFileWithQe([ActionParameter] TranslateFileWithQeRequest input)
     {
-        var endpoint = "multi-language-identification/async";
+        var endpoint = "mt/translations/async";
         var request = new LanguageWeaverRequest(endpoint, Method.Post);
-        request.AddJsonBody(new
+
+        var fileName = input.FileName ?? input.File.Name;
+        request.AddParameter("sourceLanguageId", input.SourceLanguage);
+        request.AddParameter("targetLanguageId", input.TargetLanguage);
+        request.AddParameter("model", input.Model ?? "genericqe");
+        request.AddParameter("translationMode", input.TranslationMode ?? "quality");
+        request.AddParameter("pdfConverter", input.PdfConverter ?? "STANDARD");
+        request.AddParameter("qualityEstimation", 1);
+        request.AddFile("input", input.File.Bytes, fileName);
+
+        if (input.InputFormat != null)
         {
-            input = input.Text,
-            inputFormat = input.Format ?? "PLAIN"
-        });
+            request.AddParameter("inputFormat", input.InputFormat);
+        }
 
-        return IdentifyLanguage(request);
+        var (response, status) = await Translate(request);
+
+        return new()
+        {
+            File = new(response.RawBytes ?? Array.Empty<byte>())
+            {
+                Name = fileName,
+                ContentType = MediaTypeNames.Application.Octet
+            },
+            Stats = status.TranslationStats,
+            Quality = status.QualityEstimation.FirstOrDefault()
+        };
     }
 
-    [Action("Identify file language", Description = "Identify file language")]
-    public Task<IdentifyTextLanguageResponse> IdentifyFileLanguage(
-        [ActionParameter] IdentifyFileLanguageRequest input)
-    {
-        var endpoint = "multi-language-identification/async";
-        var request = new LanguageWeaverRequest(endpoint, Method.Post)
-            .AddFile("input", input.File.Bytes, input.FileName ?? input.File.Name)
-            .AddParameter("inputFormat", input.Format ?? "PLAIN");
-
-        return IdentifyLanguage(request);
-    }
-
-    #region Utils
-
-    private async Task<IdentifyTextLanguageResponse> IdentifyLanguage(RestRequest request)
-    {
-        var identificationCreateResponse = await Client.ExecuteAsync<CreateTranslationDto>(request);
-
-        var requestId = identificationCreateResponse.Data.RequestId;
-        Client.PollIndentificationOperation(requestId, Creds);
-
-        var resultEndpoint = $"multi-language-identification/async/{requestId}/result";
-        var resultRequest = new LanguageWeaverRequest(resultEndpoint, Method.Get);
-
-        return await Client.GetAsync<IdentifyTextLanguageResponse>(resultRequest);
-    }
-
-    private async Task<RestResponse> Translate(RestRequest request)
+    private async Task<(RestResponse, TranslationStatusDto)> Translate(RestRequest request)
     {
         var translationCreateResponse = await Client.ExecuteAsync<CreateTranslationDto>(request);
 
@@ -122,8 +138,6 @@ public class TranslationActions : LanguageWeaverInvocable
         var resultEndpoint = $"mt/translations/async/{requestId}/content";
         var resultRequest = new LanguageWeaverRequest(resultEndpoint, Method.Get);
 
-        return await Client.GetAsync(resultRequest);
+        return (await Client.GetAsync(resultRequest), status);
     }
-
-    #endregion
 }
