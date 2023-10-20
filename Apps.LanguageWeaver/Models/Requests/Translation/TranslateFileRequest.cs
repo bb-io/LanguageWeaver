@@ -28,5 +28,5 @@ public class TranslateFileRequest : FileRequest
 
     [Display("PDF Converter")]
     [DataSource(typeof(PdfConverterDataHandler))]
-    public string PdfConverter { get; set; }
+    public string? PdfConverter { get; set; }
 }
