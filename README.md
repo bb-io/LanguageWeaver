@@ -23,7 +23,7 @@ Before you can connect you need to make sure that:
 4. Fill in your Client ID and Client secret that you copied from the [Language Weaver portal](https://portal.languageweaver.com/settings/api-credentials)
 5. Click _Connect_.
 
-![1697473360187](image/README/1697473360187.png)
+![Connecting](image/README/1697473360187.png)
 
 ## Actions
 
@@ -54,10 +54,13 @@ Quality estimation and ABBYY PDF conversion have to be enabled for your account 
 - **Delete dictionary**
 - **Get dictionary**
 
-## Example
+## Examples
 
-![1697474172103](image/README/1697474172103.png)
-This basic example shows how you can use Language Weaver to translate Microsoft Teams messages
+![First example](image/README/1697474172103.png)
+This basic example shows how you can use Language Weaver to translate Microsoft Teams messages.
+
+![Second example](image/README/Example2.png)
+Here, whenever PDF files are uploaded to SharePoint Documents, each file is downloaded, translated with Language Weaver and placed in the appropriate directory based on the translation quality assessment. 
 
 ## Missing features
 
