@@ -1,5 +1,7 @@
 ﻿using System.Net.Mime;
+using System.Text.RegularExpressions;
 using Apps.LanguageWeaver.Api;
+using Apps.LanguageWeaver.Constants;
 using Apps.LanguageWeaver.Invocables;
 using Apps.LanguageWeaver.Models.Dto;
 using Apps.LanguageWeaver.Models.Requests.Translation;
@@ -68,27 +70,29 @@ public class TranslationActions : LanguageWeaverInvocable
         var endpoint = "mt/translations/async";
         var request = new LanguageWeaverRequest(endpoint, Method.Post);
 
-        var fileName = input.FileName ?? input.File.Name;
+        var fileExtension = Path.GetExtension(input.File.Name);
+        var inputFormat = FileInputFormats.All.First(f => f.Extension.Contains(fileExtension)).Name;
         request.AddParameter("sourceLanguageId", input.SourceLanguage ?? "auto");
         request.AddParameter("targetLanguageId", input.TargetLanguage);
         request.AddParameter("model", input.Model ?? "generic");
         request.AddParameter("translationMode", input.TranslationMode ?? "quality");
         request.AddParameter("pdfConverter", input.PdfConverter ?? "STANDARD");
-        request.AddFile("input", input.File.Bytes, fileName);
-
-        if (input.InputFormat != null)
-        {
-            request.AddParameter("inputFormat", input.InputFormat);
-        }
+        request.AddParameter("inputFormat", input.InputFormat ?? inputFormat);
+        request.AddFile("input", input.File.Bytes, input.FileName ?? input.File.Name);
 
         var (response, status) = await Translate(request);
+        var contentDispositionHeader = response.ContentHeaders.First(header => header.Name == "Content-Disposition");
+        var filename = Regex.Match(contentDispositionHeader.Value.ToString(), @"filename=""(.*?)""").Groups[1].Value;
+
+        if (!MimeTypes.TryGetMimeType(filename, out var contentType) || contentType == MediaTypeNames.Text.Plain)
+            contentType = MediaTypeNames.Application.Octet;
 
         return new()
         {
             File = new(response.RawBytes ?? Array.Empty<byte>())
             {
-                Name = fileName,
-                ContentType = MediaTypeNames.Application.Octet
+                Name = filename,
+                ContentType = contentType
             },
             Stats = status.TranslationStats
         };
@@ -100,31 +104,33 @@ public class TranslationActions : LanguageWeaverInvocable
         var endpoint = "mt/translations/async";
         var request = new LanguageWeaverRequest(endpoint, Method.Post);
 
-        var fileName = input.FileName ?? input.File.Name;
-        request.AddParameter("sourceLanguageId", input.SourceLanguage);
+        var fileExtension = Path.GetExtension(input.File.Name);
+        var inputFormat = FileInputFormats.All.First(f => f.Extension.Contains(fileExtension)).Name;
+        request.AddParameter("sourceLanguageId", input.SourceLanguage ?? "auto");
         request.AddParameter("targetLanguageId", input.TargetLanguage);
         request.AddParameter("model", input.Model ?? "genericqe");
         request.AddParameter("translationMode", input.TranslationMode ?? "quality");
         request.AddParameter("pdfConverter", input.PdfConverter ?? "STANDARD");
         request.AddParameter("qualityEstimation", 1);
-        request.AddFile("input", input.File.Bytes, fileName);
-
-        if (input.InputFormat != null)
-        {
-            request.AddParameter("inputFormat", input.InputFormat);
-        }
+        request.AddParameter("inputFormat", input.InputFormat ?? inputFormat);
+        request.AddFile("input", input.File.Bytes, input.FileName ?? input.File.Name);
 
         var (response, status) = await Translate(request);
+        var contentDispositionHeader = response.ContentHeaders.First(header => header.Name == "Content-Disposition");
+        var filename = Regex.Match(contentDispositionHeader.Value.ToString(), @"filename=""(.*?)""").Groups[1].Value;
+
+        if (!MimeTypes.TryGetMimeType(filename, out var contentType) || contentType == MediaTypeNames.Text.Plain)
+            contentType = MediaTypeNames.Application.Octet;
 
         return new()
         {
             File = new(response.RawBytes ?? Array.Empty<byte>())
             {
-                Name = fileName,
-                ContentType = MediaTypeNames.Application.Octet
+                Name = filename,
+                ContentType = contentType
             },
             Stats = status.TranslationStats,
-            Quality = status.QualityEstimation.FirstOrDefault()
+            Quality = status.QualityEstimation?.FirstOrDefault()
         };
     }
 
