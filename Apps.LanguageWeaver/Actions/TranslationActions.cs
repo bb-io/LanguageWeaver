@@ -106,7 +106,7 @@ public class TranslationActions : LanguageWeaverInvocable
 
         var fileExtension = Path.GetExtension(input.File.Name);
         var inputFormat = FileInputFormats.All.First(f => f.Extension.Contains(fileExtension)).Name;
-        request.AddParameter("sourceLanguageId", input.SourceLanguage ?? "auto");
+        request.AddParameter("sourceLanguageId", input.SourceLanguage);
         request.AddParameter("targetLanguageId", input.TargetLanguage);
         request.AddParameter("model", input.Model ?? "genericqe");
         request.AddParameter("translationMode", input.TranslationMode ?? "quality");
