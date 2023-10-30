@@ -4,8 +4,10 @@
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-	<Version>1.0.6</Version>
-	<Authors>Blackbird.io</Authors>
+	<Product>Language Weaver</Product>
+	<Description>Language Weaver is the machine translation technology and brand of RWS.</Description>
+	<Version>1.0.0</Version>
+	<AssemblyName>Apps.LanguageWeaver</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
@@ -16,5 +18,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
   </ItemGroup>
-
+	<ItemGroup>
+		<EmbeddedResource CopyToOutputDirectory="Always" Include="image\icon.jpg"/>
+	</ItemGroup>
 </Project>
