@@ -1,23 +1,25 @@
 ﻿using System.Net.Mime;
 using System.Text.RegularExpressions;
+using Apps.LanguageWeaver.Actions.Base;
 using Apps.LanguageWeaver.Api;
 using Apps.LanguageWeaver.Constants;
-using Apps.LanguageWeaver.Invocables;
 using Apps.LanguageWeaver.Models.Dto;
 using Apps.LanguageWeaver.Models.Requests.Translation;
 using Apps.LanguageWeaver.Models.Responses.Translation;
 using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Actions;
 using Blackbird.Applications.Sdk.Common.Invocation;
+using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
 using Newtonsoft.Json;
 using RestSharp;
 
 namespace Apps.LanguageWeaver.Actions;
 
 [ActionList]
-public class TranslationActions : LanguageWeaverInvocable
+public class TranslationActions : BaseActions
 {
-    public TranslationActions(InvocationContext invocationContext) : base(invocationContext)
+    public TranslationActions(InvocationContext invocationContext, IFileManagementClient fileManagementClient) 
+        : base(invocationContext, fileManagementClient)
     {
     }
 
@@ -72,13 +74,14 @@ public class TranslationActions : LanguageWeaverInvocable
 
         var fileExtension = Path.GetExtension(input.File.Name);
         var inputFormat = FileInputFormats.All.First(f => f.Extension.Contains(fileExtension)).Name;
+        var fileBytes = await ConvertToByteArray(input.File);
         request.AddParameter("sourceLanguageId", input.SourceLanguage ?? "auto");
         request.AddParameter("targetLanguageId", input.TargetLanguage);
         request.AddParameter("model", input.Model ?? "generic");
         request.AddParameter("translationMode", input.TranslationMode ?? "quality");
         request.AddParameter("pdfConverter", input.PdfConverter ?? "STANDARD");
         request.AddParameter("inputFormat", input.InputFormat ?? inputFormat);
-        request.AddFile("input", input.File.Bytes, input.FileName ?? input.File.Name);
+        request.AddFile("input", fileBytes, input.FileName ?? input.File.Name);
 
         var (response, status) = await Translate(request);
         var contentDispositionHeader = response.ContentHeaders.First(header => header.Name == "Content-Disposition");
@@ -87,13 +90,11 @@ public class TranslationActions : LanguageWeaverInvocable
         if (!MimeTypes.TryGetMimeType(filename, out var contentType) || contentType == MediaTypeNames.Text.Plain)
             contentType = MediaTypeNames.Application.Octet;
 
+        var file = await ConvertToFileReference(response.RawBytes ?? Array.Empty<byte>(), filename, contentType);
+        
         return new()
         {
-            File = new(response.RawBytes ?? Array.Empty<byte>())
-            {
-                Name = filename,
-                ContentType = contentType
-            },
+            File = file,
             Stats = status.TranslationStats
         };
     }
@@ -106,6 +107,7 @@ public class TranslationActions : LanguageWeaverInvocable
 
         var fileExtension = Path.GetExtension(input.File.Name);
         var inputFormat = FileInputFormats.All.First(f => f.Extension.Contains(fileExtension)).Name;
+        var fileBytes = await ConvertToByteArray(input.File);
         request.AddParameter("sourceLanguageId", input.SourceLanguage);
         request.AddParameter("targetLanguageId", input.TargetLanguage);
         request.AddParameter("model", input.Model ?? "genericqe");
@@ -113,7 +115,7 @@ public class TranslationActions : LanguageWeaverInvocable
         request.AddParameter("pdfConverter", input.PdfConverter ?? "STANDARD");
         request.AddParameter("qualityEstimation", 1);
         request.AddParameter("inputFormat", input.InputFormat ?? inputFormat);
-        request.AddFile("input", input.File.Bytes, input.FileName ?? input.File.Name);
+        request.AddFile("input", fileBytes, input.FileName ?? input.File.Name);
 
         var (response, status) = await Translate(request);
         var contentDispositionHeader = response.ContentHeaders.First(header => header.Name == "Content-Disposition");
@@ -121,14 +123,12 @@ public class TranslationActions : LanguageWeaverInvocable
 
         if (!MimeTypes.TryGetMimeType(filename, out var contentType) || contentType == MediaTypeNames.Text.Plain)
             contentType = MediaTypeNames.Application.Octet;
+        
+        var file = await ConvertToFileReference(response.RawBytes ?? Array.Empty<byte>(), filename, contentType);
 
         return new()
         {
-            File = new(response.RawBytes ?? Array.Empty<byte>())
-            {
-                Name = filename,
-                ContentType = contentType
-            },
+            File = file,
             Stats = status.TranslationStats,
             Quality = status.QualityEstimation?.FirstOrDefault()
         };
