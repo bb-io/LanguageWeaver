@@ -1,5 +1,4 @@
 ﻿using Apps.LanguageWeaver.Api;
-using Apps.LanguageWeaver.Invocables;
 using Apps.LanguageWeaver.Models.Dto;
 using Apps.LanguageWeaver.Models.Requests.Content;
 using Apps.LanguageWeaver.Models.Responses.Content;
@@ -7,14 +6,16 @@ using Blackbird.Applications.Sdk.Common.Actions;
 using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Invocation;
 using RestSharp;
-using System.Net;
+using Apps.LanguageWeaver.Actions.Base;
+using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
 
 namespace Apps.LanguageWeaver.Actions;
 
 [ActionList]
-public class ContentInsightActions : LanguageWeaverInvocable
+public class ContentInsightActions : BaseActions
 {
-    public ContentInsightActions(InvocationContext invocationContext) : base(invocationContext)
+    public ContentInsightActions(InvocationContext invocationContext, IFileManagementClient fileManagementClient) 
+        : base(invocationContext, fileManagementClient)
     {
     }
 
@@ -22,8 +23,9 @@ public class ContentInsightActions : LanguageWeaverInvocable
     public async Task<GetContentInsightsResponse> CreateInsightsForFile([ActionParameter] CreateInsightsForFileRequest input)
     {
         var request = new LanguageWeaverRequest("content-insights", Method.Post);
+        var fileBytes = await ConvertToByteArray(input.File);
         request.AddParameter("sourceLanguage", input.SourceLanguage);
-        request.AddFile("input", input.File.Bytes, input.FileName ?? input.File.Name);
+        request.AddFile("input", fileBytes, input.FileName ?? input.File.Name);
 
         var createInsightResponse = await Client.ExecuteAsync<CreateInsightsDto>(request);
 
