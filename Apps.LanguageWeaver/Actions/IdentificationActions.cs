@@ -1,24 +1,21 @@
-﻿using Apps.LanguageWeaver.Api;
-using Apps.LanguageWeaver.Invocables;
+﻿using Apps.LanguageWeaver.Actions.Base;
+using Apps.LanguageWeaver.Api;
 using Apps.LanguageWeaver.Models.Dto;
 using Apps.LanguageWeaver.Models.Requests.Translation;
 using Apps.LanguageWeaver.Models.Responses.Translation;
 using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Actions;
 using Blackbird.Applications.Sdk.Common.Invocation;
+using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
 using RestSharp;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Apps.LanguageWeaver.Actions
 {
     [ActionList]
-    public class IdentificationActions : LanguageWeaverInvocable
+    public class IdentificationActions : BaseActions
     {
-        public IdentificationActions(InvocationContext invocationContext) : base(invocationContext)
+        public IdentificationActions(InvocationContext invocationContext, IFileManagementClient fileManagementClient) 
+            : base(invocationContext, fileManagementClient)
         {
         }
 
@@ -38,15 +35,16 @@ namespace Apps.LanguageWeaver.Actions
         }
 
         [Action("Identify file language", Description = "Identify file language")]
-        public Task<IdentifyTextLanguageResponse> IdentifyFileLanguage(
+        public async Task<IdentifyTextLanguageResponse> IdentifyFileLanguage(
             [ActionParameter] IdentifyFileLanguageRequest input)
         {
             var endpoint = "multi-language-identification/async";
+            var fileBytes = await ConvertToByteArray(input.File);
             var request = new LanguageWeaverRequest(endpoint, Method.Post)
-                .AddFile("input", input.File.Bytes, input.FileName ?? input.File.Name)
+                .AddFile("input", fileBytes, input.FileName ?? input.File.Name)
                 .AddParameter("inputFormat", input.Format ?? "PLAIN");
 
-            return IdentifyLanguage(request);
+            return await IdentifyLanguage(request);
         }
 
         private async Task<IdentifyTextLanguageResponse> IdentifyLanguage(RestRequest request)
