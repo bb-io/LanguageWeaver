@@ -1,4 +1,5 @@
-﻿using Apps.LanguageWeaver.Api;
+﻿using System.Net.Mime;
+using Apps.LanguageWeaver.Api;
 using Apps.LanguageWeaver.Constants;
 using Apps.LanguageWeaver.Extensions;
 using Apps.LanguageWeaver.Invocables;
@@ -99,11 +100,8 @@ public class DictionaryActions : LanguageWeaverInvocable
                 : await ListDictionaryTerms(input.DictionaryId);
         }
 
-        var sourceLanguage = input.DictionaryId == null ? input.Source! : dictionary.Source;
-        var targetLanguage = input.DictionaryId == null ? input.Target! : dictionary.Target;
-
-        await using var excelStream = glossary.ToLanguageWeaverExcelGlossary(sourceLanguage, targetLanguage, 
-            dictionaryTerms, input.OverwriteDuplicates ?? false);
+        await using var excelStream = glossary.ToLanguageWeaverExcelGlossary(dictionary, dictionaryTerms, 
+            input.OverwriteDuplicates ?? false);
         
         var excelBytes = await excelStream.GetByteData();
 
@@ -115,6 +113,30 @@ public class DictionaryActions : LanguageWeaverInvocable
         
         await Client.ExecuteWithErrorHandling(importDictionaryRequest);
         return dictionary;
+    }
+
+    [Display("Export glossary", Description = "Export a dictionary")]
+    public async Task<GlossaryResponse> ExportGlossary([ActionParameter] DictionaryRequest dictionaryInput,
+        [ActionParameter] ExportGlossaryRequest input)
+    {
+        var dictionary = await GetDictionary(dictionaryInput);
+
+        var exportDictionaryRequest =
+            new LanguageWeaverRequest($"/accounts/{_accountId}/dictionaries/{dictionary.DictionaryId}/terms/export",
+                Method.Get);
+        exportDictionaryRequest.AddHeader("Accept", "*/*");
+
+        var exportDictionaryResponse = await Client.ExecuteWithErrorHandling(exportDictionaryRequest);
+
+        await using var excelStream = new MemoryStream(exportDictionaryResponse.RawBytes!);
+        var glossary = excelStream.ToGlossary(dictionary, input.Title ?? dictionary.Name,
+            input.SourceDescription ?? dictionary.Description);
+
+        await using var glossaryStream = glossary.ConvertToTbx();
+        var glossaryFileReference = await _fileManagementClient.UploadAsync(glossaryStream, MediaTypeNames.Text.Xml,
+            $"{(glossary.Title ?? dictionary.Name).Replace(' ', '_')}.tbx");
+
+        return new(glossaryFileReference);
     }
 
     private Task<AccountDto> GetSelf() => new AccountActions(InvocationContext).GetSelf();
@@ -130,7 +152,7 @@ public class DictionaryActions : LanguageWeaverInvocable
     {
         const int pageSize = 100;
         var endpoint = $"accounts/{_accountId}/dictionaries/{dictionaryId}/terms?pageSize={pageSize}&pageNumber={{0}}";
-        
+
         var terms = new List<DictionaryTermDto>();
         var pageNumber = 1;
         ListDictionaryTermsResponse response;

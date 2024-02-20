@@ -1,6 +1,6 @@
-﻿using System.Text;
-using Apps.LanguageWeaver.Models.Dto;
+﻿using Apps.LanguageWeaver.Models.Dto;
 using Blackbird.Applications.Sdk.Glossaries.Utils.Dtos;
+using Blackbird.Applications.Sdk.Glossaries.Utils.Parsers;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
@@ -11,9 +11,9 @@ public static class GlossaryExtensions
 {
     #region Constants
 
-    public const string Source = "source";
-    public const string Target = "target";
-    public const string Comment = "comment";
+    private const string Source = "source";
+    private const string Target = "target";
+    private const string Comment = "comment";
 
     #endregion
 
@@ -215,12 +215,10 @@ public static class GlossaryExtensions
 
     #region Import
 
-    public static MemoryStream ToLanguageWeaverExcelGlossary(this Glossary glossary,
-        string languageWeaverSourceLanguage, string languageWeaverTargetLanguage, 
+    public static MemoryStream ToLanguageWeaverExcelGlossary(this Glossary glossary, DictionaryDto dictionaryDto, 
         IEnumerable<DictionaryTermDto> dictionaryTerms, bool overwriteDuplicates)
     {
-        var glossaryLanguageCodes =
-            GetTargetGlossaryLanguageCodes(glossary, languageWeaverSourceLanguage, languageWeaverTargetLanguage);
+        var glossaryLanguageCodes = GetTargetGlossaryLanguageCodes(glossary, dictionaryDto);
         
         var tbxSourceLanguage = glossaryLanguageCodes.Source;
         var tbxTargetLanguage = glossaryLanguageCodes.Target;
@@ -241,25 +239,12 @@ public static class GlossaryExtensions
             if (sourceTerm == null || targetTerm == null)
                 continue;
 
-            var comment = new StringBuilder();
+            var comment = string.Empty;
 
-            var sourceNotes = GetTermComment(sourceTerm);
-
-            if (sourceNotes != null)
-            {
-                comment.Append("Source: \n");
-                comment.Append(sourceNotes);
-            }
-                
-            var targetNotes = GetTermComment(targetTerm);
-
-            if (targetNotes != null)
-            {
-                comment.Append("Target: \n");
-                comment.Append(targetNotes);
-            }
+            if (sourceTerm.Notes != null)
+                comment = string.Join("; ", sourceTerm.Notes);
             
-            rows.Add(new() { sourceTerm.Term, targetTerm.Term, comment.ToString() });
+            rows.Add(new() { sourceTerm.Term, targetTerm.Term, comment });
         }
         
         var excelStream = CreateExcelFile(rows, glossary.Title ?? Guid.NewGuid().ToString());
@@ -267,7 +252,7 @@ public static class GlossaryExtensions
     }
 
     private static (string Source, string Target) GetTargetGlossaryLanguageCodes(Glossary glossary, 
-        string languageWeaverSourceLanguage, string languageWeaverTargetLanguage)
+        DictionaryDto dictionaryDto)
     {
         static string GetLanguage(string[] glossaryLanguages, string languageWeaverLanguage)
         {
@@ -291,8 +276,8 @@ public static class GlossaryExtensions
             .Distinct()
             .ToArray();
 
-        var sourceLanguage = GetLanguage(glossaryLanguageCodes, languageWeaverSourceLanguage);
-        var targetLanguage = GetLanguage(glossaryLanguageCodes, languageWeaverTargetLanguage);
+        var sourceLanguage = GetLanguage(glossaryLanguageCodes, dictionaryDto.Source);
+        var targetLanguage = GetLanguage(glossaryLanguageCodes, dictionaryDto.Target);
 
         return new(sourceLanguage, targetLanguage);
     }
@@ -300,30 +285,6 @@ public static class GlossaryExtensions
     private static GlossaryTermSection? GetTerm(GlossaryConceptEntry entry, string tbxLanguage)
         => entry.LanguageSections.FirstOrDefault(section => section.LanguageCode == tbxLanguage)?.Terms
             .FirstOrDefault();
-
-    private static string? GetTermComment(GlossaryTermSection term)
-    {
-        if (term.Notes != null || term.PartOfSpeech != null || term.UsageExample != null || term.CaseSensitivity != null)
-        {
-            var comment = new StringBuilder();
-            
-            if (term.Notes != null)
-                comment.Append($"\tNotes: {string.Join("; ", term.Notes)}\n");
-
-            if (term.PartOfSpeech != null)
-                comment.Append($"\tPart of speech: {term.PartOfSpeech.ToString()}\n");
-
-            if (term.UsageExample != null)
-                comment.Append($"\tUsage example: {term.UsageExample}\n");
-
-            if (term.CaseSensitivity != null)
-                comment.Append($"\tCase sensitivity: {term.CaseSensitivity}\n");
-            
-            return comment.ToString();
-        }
-
-        return null;
-    }
     
     private static MemoryStream CreateExcelFile(List<List<string>> rows, string glossaryTitle)
     {
@@ -390,5 +351,40 @@ public static class GlossaryExtensions
         return excelStream;
     }
 
+    #endregion
+    
+    #region Export
+
+    public static Glossary ToGlossary(this Stream excelStream, DictionaryDto dictionaryDto, string glossaryTitle, 
+        string glossarySourceDescription)
+    {
+        var parsedExcel = excelStream.ParseXlsxFile();
+        
+        var tbxSourceLanguage = LanguageWeaverToTbxLanguages[dictionaryDto.Source];
+        var tbxTargetLanguage = LanguageWeaverToTbxLanguages[dictionaryDto.Target];
+
+        var entries = new List<GlossaryConceptEntry>();
+        var length = parsedExcel.Values.First().Count;
+
+        for (var i = 0; i < length; i++)
+        {
+            var sourceTerm = parsedExcel[Source][i];
+            var targetTerm = parsedExcel[Target][i];
+            var comment = parsedExcel[Comment][i];
+
+            var languageSections = new List<GlossaryLanguageSection>
+            {
+                new(tbxSourceLanguage,
+                    new List<GlossaryTermSection> { new(sourceTerm) { Notes = comment.Split("; ").ToList() } }),
+                new(tbxTargetLanguage, new List<GlossaryTermSection> { new(targetTerm) })
+            };
+            
+            entries.Add(new(Guid.NewGuid().ToString(), languageSections));
+        }
+
+        var glossary = new Glossary(entries) { Title = glossaryTitle, SourceDescription = glossarySourceDescription };
+        return glossary;
+    }
+    
     #endregion
 }
