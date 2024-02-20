@@ -57,7 +57,7 @@ public class DictionaryActions : LanguageWeaverInvocable
         await Client.ExecuteWithErrorHandling(request);
     }
 
-    [Display("Import glossary", Description = "Import a glossary into an existing or new dictionary")]
+    [Action("Import glossary", Description = "Import a glossary into an existing or new dictionary")]
     public async Task<DictionaryDto> ImportGlossary([ActionParameter] ImportGlossaryRequest input)
     {
         if (input.DictionaryId == null && (input.Source == null || input.Target == null))
@@ -115,7 +115,7 @@ public class DictionaryActions : LanguageWeaverInvocable
         return dictionary;
     }
 
-    [Display("Export glossary", Description = "Export a dictionary")]
+    [Action("Export glossary", Description = "Export a dictionary")]
     public async Task<GlossaryResponse> ExportGlossary([ActionParameter] DictionaryRequest dictionaryInput,
         [ActionParameter] ExportGlossaryRequest input)
     {
