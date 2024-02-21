@@ -298,7 +298,7 @@ public static class GlossaryExtensions
         }
         
         var excelStream = new MemoryStream();
-        using var spreadsheetDocument = SpreadsheetDocument.Create(excelStream, SpreadsheetDocumentType.Workbook);
+        var spreadsheetDocument = SpreadsheetDocument.Create(excelStream, SpreadsheetDocumentType.Workbook);
 
         var workbookPart = spreadsheetDocument.AddWorkbookPart();
         workbookPart.Workbook = new Workbook();
@@ -344,8 +344,8 @@ public static class GlossaryExtensions
         });
         
         workbookPart.Workbook.Save();
-
-        spreadsheetDocument.Close();
+        
+        spreadsheetDocument.Dispose();
 
         excelStream.Position = 0;
         return excelStream;
