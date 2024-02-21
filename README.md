@@ -54,6 +54,7 @@ Quality estimation and ABBYY PDF conversion have to be enabled for your account 
 - **Create dictionary**.
 - **Delete dictionary**.
 - **Import glossary** allows for the import of a glossary into an existing or new dictionary. For new dictionaries, specify source and target languages, with optional title and description. When importing into an existing dictionary, use the optional _Dictionary ID_ parameter. The _Overwrite duplicate terms_ option allows control over updating existing values when importing. If the imported glossary lacks specified languages in the dictionary, the most relevant alternatives are chosen. For instance, if the dictionary includes _English_, but the glossary only has _English (United States)_, the latter's terms are incorporated into the dictionary.
+- **Export glossary** enables the export of a dictionary, with optional specifications for the glossary title and source description.
 
 ## Examples
 
