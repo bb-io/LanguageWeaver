@@ -6,7 +6,7 @@ namespace Apps.LanguageWeaver.Models.Requests.Dictionary;
 
 public class DictionaryRequest
 {
-    [Display("Dictionary")]
+    [Display("Dictionary ID")]
     [DataSource(typeof(DictionaryDataHandler))]
     public string DictionaryId { get; set; }
 }

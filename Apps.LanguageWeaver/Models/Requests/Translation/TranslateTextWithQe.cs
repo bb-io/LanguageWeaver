@@ -17,11 +17,9 @@ public class TranslateTextWithQeRequest
     [DataSource(typeof(LanguageDataHandler))]
     public string TargetLanguage { get; set; }
 
-    // Todo: uncomment when we have friendly array input
-
-    //[Display("Dictionaries")]
-    //[DataSource(typeof(DictionaryDataHandler))]
-    //public List<string>? Dictionaries { get; set; }
+    [Display("Dictionary IDs")]
+    [DataSource(typeof(DictionaryDataHandler))]
+    public IEnumerable<string>? Dictionaries { get; set; }
 
     [Display("Input format")]
     [DataSource(typeof(TextInputFormatDataHandler))]
