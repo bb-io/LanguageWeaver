@@ -9,7 +9,7 @@ public class DictionaryDto
   
     public string Name { get; set; }
     
-    public string Desciption { get; set; }
+    public string Description { get; set; }
     
     [Display("Source language")]
     public string Source { get; set; }

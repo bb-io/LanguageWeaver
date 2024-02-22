@@ -34,7 +34,7 @@ Before you can connect you need to make sure that:
 
 All translation endpoints can have a mode of either "quality" or "speed".
 
-- **Translate text with QE**
+- **Translate text with QE**.
 - **Translate file with QE** both apply a quality estimation to the translated content. Source language is required and cannot be guessed. These actions have limited language combinations available and you should check available models in your Language Weaver account for supported language combinations.
 
 Quality estimation and ABBYY PDF conversion have to be enabled for your account in the Language Weaver settings.
@@ -42,17 +42,19 @@ Quality estimation and ABBYY PDF conversion have to be enabled for your account 
 ### Identification
 
 - **Identify text language** identifies the language of a text input.
-- **Identify file language** identifies the lnaguage of a file input.
+- **Identify file language** identifies the language of a file input.
 
 ### Content insights
 
-- **Get file content insights** creates and immediatly returns content insights for a file, this includes word/character counts, source language and a score per segment.
+- **Get file content insights** creates and immediately returns content insights for a file, this includes word/character counts, source language and a score per segment.
 
 ### Dictionary management
 
-- **Create dictionary**
-- **Delete dictionary**
-- **Get dictionary**
+- **Get dictionary** returns information about a dictionary.
+- **Create dictionary**.
+- **Delete dictionary**.
+- **Import glossary** allows for the import of a glossary into an existing or new dictionary. For new dictionaries, specify source and target languages, with optional title and description. When importing into an existing dictionary, use the optional _Dictionary ID_ parameter. The _Overwrite duplicate terms_ option allows control over updating existing values when importing. If the imported glossary lacks specified languages in the dictionary, the most relevant alternatives are chosen. For instance, if the dictionary includes _English_, but the glossary only has _English (United States)_, the latter's terms are incorporated into the dictionary.
+- **Export glossary** enables the export of a dictionary, with optional specifications for the glossary title and source description.
 
 ## Examples
 

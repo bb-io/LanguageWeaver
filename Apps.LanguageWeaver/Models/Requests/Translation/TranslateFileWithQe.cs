@@ -1,4 +1,5 @@
-﻿using Apps.LanguageWeaver.DataSourceHandlers.EnumHandlers;
+﻿using Apps.LanguageWeaver.DataSourceHandlers;
+using Apps.LanguageWeaver.DataSourceHandlers.EnumHandlers;
 using Apps.LanguageWeaver.Models.Requests.Base;
 using Blackbird.Applications.Sdk.Common;
 using Blackbird.Applications.Sdk.Common.Dynamic;
@@ -18,6 +19,10 @@ public class TranslateFileWithQeRequest : FileRequest
     [Display("Input format")]
     [DataSource(typeof(FileInputFormatDataHandler))]
     public string? InputFormat { get; set; }
+    
+    [Display("Dictionary IDs")]
+    [DataSource(typeof(DictionaryDataHandler))]
+    public IEnumerable<string>? Dictionaries { get; set; }
 
     [Display("Translation mode")]
     [DataSource(typeof(TranslationModeDataHandler))]

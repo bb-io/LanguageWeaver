@@ -34,7 +34,7 @@ public class TranslationActions : BaseActions
             targetLanguageId = input.TargetLanguage,
             input = new[] { input.Text },
             model = input.Model ?? "generic",
-            //dictionaries = input.Dictionaries ?? new List<string>(),
+            dictionaries = input.Dictionaries ?? new List<string>(),
             translationMode = input.TranslationMode ?? "quality",
         });
 
@@ -55,7 +55,7 @@ public class TranslationActions : BaseActions
             targetLanguageId = input.TargetLanguage,
             input = new[] { input.Text },
             model = input.Model ?? "genericqe",
-            //dictionaries = input.Dictionaries ?? new List<string>(),
+            dictionaries = input.Dictionaries ?? new List<string>(),
             translationMode = input.TranslationMode ?? "quality",
             qualityEstimation = 1,
         });
@@ -82,6 +82,12 @@ public class TranslationActions : BaseActions
         request.AddParameter("pdfConverter", input.PdfConverter ?? "STANDARD");
         request.AddParameter("inputFormat", input.InputFormat ?? inputFormat);
         request.AddFile("input", fileBytes, input.FileName ?? input.File.Name);
+
+        if (input.Dictionaries != null)
+            foreach (var dictionary in input.Dictionaries)
+            {
+                request.AddParameter("dictionaries", dictionary);
+            }
 
         var (response, status) = await Translate(request);
         var contentDispositionHeader = response.ContentHeaders.First(header => header.Name == "Content-Disposition");
@@ -116,6 +122,12 @@ public class TranslationActions : BaseActions
         request.AddParameter("qualityEstimation", 1);
         request.AddParameter("inputFormat", input.InputFormat ?? inputFormat);
         request.AddFile("input", fileBytes, input.FileName ?? input.File.Name);
+        
+        if (input.Dictionaries != null)
+            foreach (var dictionary in input.Dictionaries)
+            {
+                request.AddParameter("dictionaries", dictionary);
+            }
 
         var (response, status) = await Translate(request);
         var contentDispositionHeader = response.ContentHeaders.First(header => header.Name == "Content-Disposition");
