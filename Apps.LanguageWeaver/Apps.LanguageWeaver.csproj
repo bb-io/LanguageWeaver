@@ -5,11 +5,11 @@
     <Nullable>enable</Nullable>
     <Product>Language Weaver</Product>
     <Description>Language Weaver is the machine translation technology and brand of RWS.</Description>
-    <Version>1.1.0</Version>
+    <Version>1.1.1</Version>
     <AssemblyName>Apps.LanguageWeaver</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Blackbird.Applications.Sdk.Common" Version="2.3.3" />
+    <PackageReference Include="Blackbird.Applications.Sdk.Common" Version="2.6.0" />
     <PackageReference Include="Blackbird.Applications.SDK.Extensions.FileManagement" Version="1.0.1" />
     <PackageReference Include="Blackbird.Applications.Sdk.Glossaries.Utils" Version="1.0.2-alpha1" />
     <PackageReference Include="Blackbird.Applications.Sdk.Utils" Version="1.0.24" />
