@@ -11,7 +11,7 @@ using Blackbird.Applications.SDK.Extensions.FileManagement.Interfaces;
 
 namespace Apps.LanguageWeaver.Actions;
 
-[ActionList]
+[ActionList("Content insight")]
 public class ContentInsightActions : BaseActions
 {
     public ContentInsightActions(InvocationContext invocationContext, IFileManagementClient fileManagementClient) 

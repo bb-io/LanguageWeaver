@@ -15,7 +15,7 @@ using RestSharp;
 
 namespace Apps.LanguageWeaver.Actions;
 
-[ActionList]
+[ActionList("Translation")]
 public class TranslationActions : BaseActions
 {
     public TranslationActions(InvocationContext invocationContext, IFileManagementClient fileManagementClient) 

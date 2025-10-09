@@ -17,7 +17,7 @@ using RestSharp;
 
 namespace Apps.LanguageWeaver.Actions;
 
-[ActionList]
+[ActionList("Dictionary")]
 public class DictionaryActions : LanguageWeaverInvocable
 {
     private readonly IFileManagementClient _fileManagementClient;

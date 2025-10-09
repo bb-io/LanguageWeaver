@@ -7,7 +7,7 @@ using RestSharp;
 
 namespace Apps.LanguageWeaver.Actions;
 
-[ActionList]
+[ActionList("Account")]
 public class AccountActions : LanguageWeaverInvocable
 {
     public AccountActions(InvocationContext invocationContext) : base(invocationContext)
