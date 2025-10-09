@@ -11,7 +11,7 @@ using RestSharp;
 
 namespace Apps.LanguageWeaver.Actions
 {
-    [ActionList]
+    [ActionList("Identification")]
     public class IdentificationActions : BaseActions
     {
         public IdentificationActions(InvocationContext invocationContext, IFileManagementClient fileManagementClient) 
