@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
     <Product>Language Weaver</Product>
     <Description>Language Weaver is the machine translation technology and brand of RWS.</Description>
-    <Version>1.1.2</Version>
+    <Version>1.1.3</Version>
     <AssemblyName>Apps.LanguageWeaver</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
@@ -20,5 +20,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource CopyToOutputDirectory="Always" Include="image\icon.jpg" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="..\README.md" Link="README.md" CopyToOutputDirectory="Always" />
   </ItemGroup>
 </Project>
